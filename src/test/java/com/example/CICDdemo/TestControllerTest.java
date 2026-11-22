@@ -19,7 +19,7 @@ public class TestControllerTest {
     void shouldReturnWelcomeMessage() throws Exception {
         mockMvc.perform(get("/test"))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Welcome to CI/CD"));
+                .andExpect(content().string("Welcome to CI/CD, version 10-STABLE"));
     }
 
 }
