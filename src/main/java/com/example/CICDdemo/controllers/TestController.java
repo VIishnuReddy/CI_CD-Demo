@@ -10,7 +10,7 @@ public class TestController {
     // test controller for testing
     @GetMapping("/test")
     public String test(){
-        return "Welcome to CI/CD";
+        return "Welcome to CI/CD, version 10-STABLE";
     }
 
     @GetMapping("/welcome")
