@@ -67,6 +67,29 @@ pipeline {
                     echo "Application health check failed"
                     exit 1
                 '''
+
+                 script {
+                            currentBuild.description =
+                                "DEPLOYED_IMAGE=${IMAGE_NAME}:${BUILD_NUMBER}"
+                        }
+            }
+        }
+
+        stage('Cleanup Old Images') {
+            steps {
+                sh '''
+                    echo "Keeping latest 2 successfully deployed images"
+
+                    docker images ${IMAGE_NAME} \
+                        --format "{{.Tag}}" \
+                        | grep -E '^[0-9]+$' \
+                        | sort -rn \
+                        | tail -n +3 \
+                        | while read tag; do
+                            echo "Removing old image: ${IMAGE_NAME}:$tag"
+                            docker rmi ${IMAGE_NAME}:$tag || true
+                        done
+                '''
             }
         }
     }
