@@ -1,14 +1,5 @@
 
 pipeline {
-
-    agent any
-
-    stages {
-
-        stage('Checkout') {
-            steps {
-pipeline {
-
     agent any
 
     environment {
@@ -17,7 +8,6 @@ pipeline {
     }
 
     stages {
-
         stage('Checkout') {
             steps {
                 checkout scm
@@ -33,72 +23,10 @@ pipeline {
 
         stage('Archive Artifact') {
             steps {
-                archiveArtifacts artifacts: 'target/*.jar',
-                                 fingerprint: true
-            }
-        }
-
-        stage('Build Docker Image') {
-            steps {
-                sh """
-                    docker build \
-                    -t ${IMAGE_NAME}:${BUILD_NUMBER} \
-                    -t ${IMAGE_NAME}:latest .
-                """
-            }
-        }
-
-        stage('Deploy Application') {
-            steps {
-                sh """
-                    docker rm -f ${CONTAINER_NAME} || true
-
-                    docker run -d \
-                    --name ${CONTAINER_NAME} \
-                    --restart unless-stopped \
-                    -p 8082:8080 \
-                    ${IMAGE_NAME}:${BUILD_NUMBER}
-                """
-            }
-        }
-
-        stage('Verify Deployment') {
-            steps {
-                sh """
-                    docker inspect \
-                    --format='{{.State.Running}}' \
-                    ${CONTAINER_NAME}
-                """
-            }
-        }
-    }
-
-    post {
-        success {
-            echo 'CI/CD Pipeline completed successfully!'
-        }
-
-        failure {
-            echo 'CI/CD Pipeline failed. Check the logs.'
-        }
-    }
-}
-
-                checkout scm
-            }
-        }
-
-        stage('Build and Test') {
-            steps {
-                sh 'chmod +x mvnw'
-                sh './mvnw -B clean verify'
-            }
-        }
-
-        stage('Archive Artifact') {
-            steps {
-                archiveArtifacts artifacts: 'target/*.jar',
-                                 fingerprint: true
+                archiveArtifacts(
+                    artifacts: 'target/*.jar',
+                    fingerprint: true
+                )
             }
         }
     }
@@ -107,7 +35,6 @@ pipeline {
         success {
             echo 'CI Pipeline completed successfully!'
         }
-
         failure {
             echo 'CI Pipeline failed. Check the logs.'
         }
