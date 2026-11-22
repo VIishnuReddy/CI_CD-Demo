@@ -1,0 +1,38 @@
+
+pipeline {
+
+    agent any
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build and Test') {
+            steps {
+                sh 'chmod +x mvnw'
+                sh './mvnw -B clean verify'
+            }
+        }
+
+        stage('Archive Artifact') {
+            steps {
+                archiveArtifacts artifacts: 'target/*.jar',
+                                 fingerprint: true
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'CI Pipeline completed successfully!'
+        }
+
+        failure {
+            echo 'CI Pipeline failed. Check the logs.'
+        }
+    }
+}
