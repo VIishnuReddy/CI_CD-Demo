@@ -29,14 +29,53 @@ pipeline {
                 )
             }
         }
+
+        stage('Build Docker Image') {
+            steps {
+                sh '''
+                    docker build -t ${IMAGE_NAME}:${BUILD_NUMBER} .
+                '''
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                sh '''
+                    docker rm -f ${CONTAINER_NAME} || true
+
+                    docker run -d \
+                        --name ${CONTAINER_NAME} \
+                        --restart unless-stopped \
+                        -p 8082:8080 \
+                        ${IMAGE_NAME}:${BUILD_NUMBER}
+                '''
+            }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                sh '''
+                    for i in $(seq 1 30); do
+                        if curl -fsS http://localhost:8082/test; then
+                            echo "Application deployed successfully!"
+                            exit 0
+                        fi
+                        sleep 2
+                    done
+
+                    echo "Application health check failed"
+                    exit 1
+                '''
+            }
+        }
     }
 
     post {
         success {
-            echo 'CI Pipeline completed successfully!'
+            echo 'CI/CD Pipeline completed successfully!'
         }
         failure {
-            echo 'CI Pipeline failed. Check the logs.'
+            echo 'CI/CD Pipeline failed. Check the logs.'
         }
     }
 }

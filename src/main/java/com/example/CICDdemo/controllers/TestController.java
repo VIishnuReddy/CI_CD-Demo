@@ -12,4 +12,9 @@ public class TestController {
     public String test(){
         return "Welcome to CI/CD";
     }
+
+    @GetMapping("/welcome")
+    public String welcome(@RequestParam String username, @RequestParam String message){
+        return  "Welcome "+username+ " you got a message "+message;
+    }
 }
